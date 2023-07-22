@@ -1,19 +1,19 @@
-import { Setting } from '@/interfaces/settings.interface';
+import { Group } from '@/interfaces/group.interface';
 import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
-export class SettingEntity extends BaseEntity implements Setting {
+export class GroupEntity extends BaseEntity implements Group {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  name: string;
+  groupID: string;
 
   @Column()
-  value: string;
+  userId: number;
 
   @Column()
-  description: string;
+  userRole?: string;
 
   @Column()
   @CreateDateColumn()
