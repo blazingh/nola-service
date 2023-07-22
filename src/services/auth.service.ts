@@ -137,20 +137,18 @@ export class AuthService extends Repository<UserEntity> {
 
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
-    if (findUser.emailVerified && decodedToken.method === 'email') throw new HttpException(409, 'User email is already verified');
-
-    if (findUser.phoneVerified && decodedToken.method === 'phone') throw new HttpException(409, 'User phone is already verified');
-
-    if (!findUser.verifyEmailToken || findUser.verifyEmailToken !== token) throw new HttpException(409, 'Invalid token');
-
-    if (!findUser.verifyPhoneToken || findUser.verifyPhoneToken !== token) throw new HttpException(409, 'Invalid token');
-
     if (decodedToken.method === 'email') {
+      if (findUser.emailVerified) throw new HttpException(409, 'User email is already verified');
+      if (!findUser.verifyEmailToken || findUser.verifyEmailToken !== token) throw new HttpException(409, 'Invalid token');
       findUser.emailVerified = true;
+      findUser.verifyEmailToken = null;
     }
 
     if (decodedToken.method === 'phone') {
+      if (findUser.phoneVerified) throw new HttpException(409, 'User phone is already verified');
+      if (!findUser.verifyPhoneToken || findUser.verifyPhoneToken !== token) throw new HttpException(409, 'Invalid token');
       findUser.phoneVerified = true;
+      findUser.verifyPhoneToken = null;
     }
 
     await UserEntity.update(findUser.id, findUser);

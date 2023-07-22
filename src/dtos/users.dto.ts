@@ -35,6 +35,10 @@ export class NewPasswordDto {
   @MinLength(9)
   @MaxLength(32)
   public password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  public token: string;
 }
 
 export class UpdateUserDto {
