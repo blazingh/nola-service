@@ -3,6 +3,10 @@ import { User } from '@interfaces/users.interface';
 
 export interface DataStoredInToken {
   id: number;
+  sub: string;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  adminVerified: boolean;
 }
 
 export interface TokenData {

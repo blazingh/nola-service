@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { ConnectionOptions } from 'typeorm';
-import { DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_DATABASE } from '@config';
+import { DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_DATABASE, DB_SCHEMA } from '@config';
 
 export const dbConnection: ConnectionOptions = {
   type: 'postgres',
@@ -9,7 +9,7 @@ export const dbConnection: ConnectionOptions = {
   host: DB_HOST,
   port: Number(DB_PORT),
   database: DB_DATABASE,
-  schema: 'auth_user',
+  schema: DB_SCHEMA,
   synchronize: true,
   logging: false,
   entities: [join(__dirname, '../**/*.entity{.ts,.js}')],

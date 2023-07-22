@@ -2,14 +2,14 @@ import bcrypt from 'bcrypt';
 import request from 'supertest';
 import { createConnection, getConnection, Repository } from 'typeorm';
 import { App } from '@/app';
-import { dbConnection } from '@databases';
+import { dbConnection } from '@database';
 import { CreateUserDto } from '@dtos/users.dto';
 import { UserEntity } from '@entities/users.entity';
 import { UserRoute } from '@routes/users.route';
 
-// beforeAll(async () => {
-//   await createConnection(dbConnection);
-// });
+beforeAll(async () => {
+  await createConnection(dbConnection);
+});
 
 afterAll(async () => {
   await getConnection().close();
@@ -21,6 +21,7 @@ describe('Testing Users', () => {
       const userData: CreateUserDto = {
         email: 'test@email.com',
         password: 'q1w2e3r4!',
+        phone: '01012345678',
       };
 
       const usersRoute = new UserRoute();
@@ -90,6 +91,7 @@ describe('Testing Users', () => {
       const userData: CreateUserDto = {
         email: 'test@email.com',
         password: '1q2w3e4r!',
+        phone: '01012345678',
       };
 
       const usersRoute = new UserRoute();
