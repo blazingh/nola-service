@@ -9,6 +9,7 @@ export class AuthController {
   public auth = Container.get(AuthService);
   public transporter = MailHelper.transporter;
 
+  // sign a user up
   public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userData: User = req.body;
@@ -22,36 +23,39 @@ export class AuthController {
         html: `<a href="${verifactionLink}">Verify Email</a>`,
       });
 
-      res.status(201).json({ data: signUpUserData, message: mail });
+      res.status(201).json({ data: signUpUserData, message: mail.response });
     } catch (error) {
       next(error);
     }
   };
 
+  // log a user in
   public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userData: User = req.body;
       const { cookie, findUser } = await this.auth.login(userData);
 
       res.setHeader('Set-Cookie', [cookie]);
-      res.status(200).json({ data: findUser, message: 'login' });
+      res.status(200).json({ data: findUser, message: 'user logged in' });
     } catch (error) {
       next(error);
     }
   };
 
+  // log a user out
   public logOut = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userData: User = req.user;
       const logOutUserData: User = await this.auth.logout(userData);
 
       res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
-      res.status(200).json({ data: logOutUserData, message: 'logout' });
+      res.status(200).json({ data: logOutUserData, message: 'user logged out' });
     } catch (error) {
       next(error);
     }
   };
 
+  // send reset password link to user email
   public sendResetPassword = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userData: User = req.user;
@@ -63,27 +67,29 @@ export class AuthController {
         html: `<a href="${resetPasswordLink}">Reset Password</a>`,
       });
 
-      res.status(200).json({ data: userData, message: mail });
+      res.status(200).json({ data: userData, message: mail.response });
     } catch (error) {
       next(error);
     }
   };
 
+  // verify user email or phone
   public verifyUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { token } = req.params;
       const userData: User = await this.auth.verifyUserToken(token);
-      res.status(200).json({ data: userData, message: 'verifyUser' });
+      res.status(200).json({ data: userData, message: 'user verified' });
     } catch (error) {
       next(error);
     }
   };
 
+  // reset user passwordaa
   public resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { password, token } = req.body;
       const userData: User = await this.auth.resetPasswordWithToken(token, password);
-      res.status(200).json({ data: userData, message: 'resetPassword' });
+      res.status(200).json({ data: userData, message: 'password reset' });
     } catch (error) {
       next(error);
     }
