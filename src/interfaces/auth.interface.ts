@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import e, { Request } from 'express';
 import { User } from '@interfaces/users.interface';
 
 export interface DataStoredInToken {
@@ -7,6 +7,12 @@ export interface DataStoredInToken {
   emailVerified: boolean;
   phoneVerified: boolean;
   adminVerified: boolean;
+}
+
+export interface verifactionToken {
+  type: string;
+  sub: string;
+  method: string;
 }
 
 export interface TokenData {

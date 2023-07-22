@@ -29,6 +29,14 @@ export class CreateUserDto {
   }
 }
 
+export class NewPasswordDto {
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(9)
+  @MaxLength(32)
+  public password: string;
+}
+
 export class UpdateUserDto {
   @IsString()
   @IsNotEmpty()

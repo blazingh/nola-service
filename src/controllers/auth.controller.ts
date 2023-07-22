@@ -12,7 +12,9 @@ export class AuthController {
       const userData: User = req.body;
       const signUpUserData: User = await this.auth.signup(userData);
 
-      res.status(201).json({ data: signUpUserData, message: 'signup' });
+      const verifactionLink = await this.auth.generateVerificationLink(signUpUserData);
+
+      res.status(201).json({ data: signUpUserData, message: verifactionLink });
     } catch (error) {
       next(error);
     }
@@ -37,6 +39,38 @@ export class AuthController {
 
       res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
       res.status(200).json({ data: logOutUserData, message: 'logout' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public sendResetPassword = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userData: User = req.user;
+      const resetPasswordLink = await this.auth.generateResetPasswordLink(userData);
+
+      res.status(200).json({ data: userData, message: resetPasswordLink });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public verifyUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { token } = req.params;
+      const userData: User = await this.auth.verifyUserToken(token);
+      res.status(200).json({ data: userData, message: 'verifyUser' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { token } = req.params;
+      const { password } = req.body;
+      const userData: User = await this.auth.resetPasswordWithToken(token, password);
+      res.status(200).json({ data: userData, message: 'resetPassword' });
     } catch (error) {
       next(error);
     }

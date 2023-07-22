@@ -1,11 +1,11 @@
 import { compare, hash } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 import { Service } from 'typedi';
 import { EntityRepository, Repository } from 'typeorm';
-import { SECRET_KEY } from '@config';
+import { APP_URL, EXPIRES_IN, SECRET_KEY } from '@config';
 import { UserEntity } from '@entities/users.entity';
 import { HttpException } from '@/exceptions/httpException';
-import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
+import { DataStoredInToken, TokenData, verifactionToken } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
 
 const createToken = (user: User): TokenData => {
@@ -17,9 +17,24 @@ const createToken = (user: User): TokenData => {
     adminVerified: user.adminVerified,
   };
   const secretKey: string = SECRET_KEY;
-  const expiresIn: number = 60 * 60;
+  const expiresIn: number = EXPIRES_IN;
 
   return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
+};
+
+const createVerifactionToken = (user: User): string => {
+  const dataStoredInToken: verifactionToken = {
+    type: 'verification',
+    sub: user.id.toString(),
+    method: user.email ? 'email' : 'phone',
+  };
+
+  const secretKey: string = SECRET_KEY;
+  const expiresIn: number = 15 * 60;
+
+  const token = sign(dataStoredInToken, secretKey, { expiresIn });
+
+  return token;
 };
 
 const createCookie = (tokenData: TokenData): string => {
@@ -76,6 +91,101 @@ export class AuthService extends Repository<UserEntity> {
   public async logout(userData: User): Promise<User> {
     const findUser: User = await UserEntity.findOne({ where: { email: userData.email, password: userData.password } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
+
+    return findUser;
+  }
+
+  public async generateVerificationLink(userData: User, method: string): Promise<string> {
+    if (method === 'email') {
+      const findUser: User = await UserEntity.findOne({ where: { email: userData.email } });
+      if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
+
+      if (findUser.emailVerified) throw new HttpException(409, `This email ${userData.email} is already verified`);
+
+      const verifactionToken = createVerifactionToken(findUser);
+
+      const verifacaionLink = `${APP_URL}/auth/verify/${verifactionToken}`;
+
+      await UserEntity.update(findUser.id, { ...findUser, verifyEmailToken: verifactionToken });
+
+      return verifacaionLink;
+    }
+
+    if (method === 'phone') {
+      const findUser: User = await UserEntity.findOne({ where: { phone: userData.phone } });
+
+      if (!findUser) throw new HttpException(409, `This phone ${userData.phone} was not found`);
+
+      if (findUser.phoneVerified) throw new HttpException(409, `This phone ${userData.phone} is already verified`);
+
+      const verifactionToken = createVerifactionToken(findUser);
+
+      const verifacaionLink = `${APP_URL}/auth/verify/${verifactionToken}`;
+
+      await UserEntity.update(findUser.id, { ...findUser, verifyEmailToken: verifactionToken });
+
+      return verifacaionLink;
+    }
+
+    throw new HttpException(409, `This method ${method} is not supported`);
+  }
+
+  public async verifyUserToken(token: string): Promise<User> {
+    const decodedToken = (await verify(token, SECRET_KEY)) as verifactionToken;
+
+    const findUser: User = await UserEntity.findOne({ where: { id: decodedToken.sub } });
+
+    if (!findUser) throw new HttpException(409, "User doesn't exist");
+
+    if (findUser.emailVerified && decodedToken.method === 'email') throw new HttpException(409, 'User email is already verified');
+
+    if (findUser.phoneVerified && decodedToken.method === 'phone') throw new HttpException(409, 'User phone is already verified');
+
+    if (!findUser.verifyEmailToken || findUser.verifyEmailToken !== token) throw new HttpException(409, 'Invalid token');
+
+    if (!findUser.verifyPhoneToken || findUser.verifyPhoneToken !== token) throw new HttpException(409, 'Invalid token');
+
+    if (decodedToken.method === 'email') {
+      findUser.emailVerified = true;
+    }
+
+    if (decodedToken.method === 'phone') {
+      findUser.phoneVerified = true;
+    }
+
+    await UserEntity.update(findUser.id, findUser);
+
+    return findUser;
+  }
+
+  public async generateResetPasswordLink(userData: User): Promise<string> {
+    const findUser: User = await UserEntity.findOne({ where: { id: userData.id } });
+
+    if (!findUser) throw new HttpException(409, "User doesn't exist");
+
+    const verifactionToken = createVerifactionToken(findUser);
+
+    const verifacaionLink = `${APP_URL}/auth/reset-password/${verifactionToken}`;
+
+    await UserEntity.update(findUser.id, { ...findUser, resetPasswordToken: verifactionToken });
+
+    return verifacaionLink;
+  }
+
+  public async resetPasswordWithToken(token: string, newPassword: string): Promise<User> {
+    const decodedToken = (await verify(token, SECRET_KEY)) as verifactionToken;
+
+    const findUser: User = await UserEntity.findOne({ where: { id: decodedToken.sub } });
+
+    if (!findUser) throw new HttpException(409, "User doesn't exist");
+
+    if (!findUser.resetPasswordToken || findUser.resetPasswordToken !== token) throw new HttpException(409, 'Invalid token');
+
+    const hashedPassword = await hash(newPassword, 10);
+
+    findUser.password = hashedPassword;
+
+    await UserEntity.update(findUser.id, { ...findUser, resetPasswordToken: null });
 
     return findUser;
   }

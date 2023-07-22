@@ -7,13 +7,17 @@ export class UserEntity extends BaseEntity implements User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   @Unique(['email'])
-  email: string;
+  email!: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   @Unique(['phone'])
-  phone: string;
+  phone!: string;
 
   @Column()
   @IsNotEmpty()
@@ -50,4 +54,19 @@ export class UserEntity extends BaseEntity implements User {
   @Column()
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({
+    nullable: true,
+  })
+  resetPasswordToken: string;
+
+  @Column({
+    nullable: true,
+  })
+  verifyEmailToken: string;
+
+  @Column({
+    nullable: true,
+  })
+  verifyPhoneToken: string;
 }

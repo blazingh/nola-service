@@ -8,4 +8,7 @@ export interface User {
   emailVerified?: boolean;
   phoneVerified?: boolean;
   adminVerified?: boolean;
+  resetPasswordToken?: string;
+  verifyEmailToken?: string;
+  verifyPhoneToken?: string;
 }
