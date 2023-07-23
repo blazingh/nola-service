@@ -139,6 +139,7 @@ describe('Testing Auth', () => {
     });
   });
 
+  // delete user
   describe('[delete] /admin/user', () => {
     it('delete user', async () => {
       const response = await axios.delete(`${apiUrl}/admin/user/${userId}`, { headers: { Authorization: `Bearer ${adminToken}` } });
@@ -148,26 +149,120 @@ describe('Testing Auth', () => {
     });
   })
 
-  describe('[POST] /signup/phone', () => {
-    it('response should have the Create userData', async () => {
-      const response = await axios.post(`${apiUrl}/auth/signup/phone`, userData);
-
-      expect(response.status).toEqual(201);
-      expect(response.data.data).toHaveProperty('id');
-      expect(response.data.data).toHaveProperty('phone');
-
-      userId = response.data.data.id;
+  // disable phone signup
+  describe('[POST] /admin/setting/:name', () => {
+    it('disable phone signup', async () => {
+      const response = await axios.put(`${apiUrl}/admin/setting/${settingsOptions.DISABLE_PHONE_SIGNUP}`, { value: "true" }, { headers: { Authorization: `Bearer ${adminToken}` } });
+      expect(response.status).toEqual(200);
     });
   });
 
+  // try to signup with phone
+  describe('[POST] /signup/phone', () => {
+    it('phone signup should be disabled', async () => {
+      try{
+      const response = await axios.post(`${apiUrl}/auth/signup/phone`, userData);
+      }catch(error){
+      expect(error.response.status).toEqual(403);
+      }
+    });
+  });
+
+  // enable phone signup
+  describe('[POST] /admin/setting/:name', () => {
+    it('enable phone signup', async () => {
+      const response = await axios.put(`${apiUrl}/admin/setting/${settingsOptions.DISABLE_PHONE_SIGNUP}`, { value: "false" }, { headers: { Authorization: `Bearer ${adminToken}` } });
+      expect(response.status).toEqual(200);
+    });
+  });
+
+  // signup with phone
+  describe('[POST] /signup/phone', () => {
+    it('response should have the Create userData', async () => {
+      const response = await axios.post(`${apiUrl}/auth/signup/phone`, userData);
+      expect(response.status).toEqual(201);
+      expect(response.data.data).toHaveProperty('id');
+      expect(response.data.data).toHaveProperty('phone');
+      userId = response.data.data.id;
+      verifactionToken = response.data.token;
+    });
+  });
+
+  // test duplicate phone
   describe('[POST] /signup/phone', () => {
     it('response should give error for user exist', async () => {
       try{
-      
       const response = await axios.post(`${apiUrl}/auth/signup/phone`, userData);
-
       }catch(error){
       expect(error.response.status).toEqual(409);
+      }
+    });
+  });
+
+  // disallow unverified phone login
+  describe('[POST] /admin/setting/:name', () => {
+    it('disable phone login', async () => {
+      const response = await axios.put(`${apiUrl}/admin/setting/${settingsOptions.ALLOW_UNVERIFIED_PHONE_LOGIN}`, { value: "true" }, { headers: { Authorization: `Bearer ${adminToken}` } });
+      expect(response.status).toEqual(200);
+    });
+  });
+
+  // enable phone login
+  describe('[POST] /admin/setting/:name', () => {
+    it('enable phone login', async () => {
+      const response = await axios.put(`${apiUrl}/admin/setting/${settingsOptions.DISABLE_PHONE_LOGIN}`, { value: "false" }, { headers: { Authorization: `Bearer ${adminToken}` } });
+      expect(response.status).toEqual(200);
+    });
+  });
+
+  // try to login with phone
+  describe('[POST] /login/phone', () => {
+    it('phone login should be disabled', async () => {
+      try{
+      const response = await axios.post(`${apiUrl}/auth/login/phone`, userData);
+      }catch(error){
+      expect(error.response.status).toEqual(403);
+      }
+    });
+  });
+
+  // verify phone
+  describe('[POST] /verify', () => {
+    it('verify phone', async () => {
+      const response = await axios.get(`${apiUrl}/auth/verify/${verifactionToken}`);
+      expect(response.status).toEqual(200);
+    });
+  });
+
+  // should be able to login with phone
+  describe('[POST] /login/phone', () => {
+    it('phone login should be enabled', async () => {
+      const response = await axios.post(`${apiUrl}/auth/login/phone`, userData);
+      expect(response.status).toEqual(200);
+      expect(response.data.data).toHaveProperty('id');
+      expect(response.data.data).toHaveProperty('phone');
+    });
+  });
+
+  // disable phone login
+  describe('[POST] /admin/setting/:name', () => {
+    it('disable phone login', async () => {
+      try{
+        const response = await axios.put(`${apiUrl}/admin/setting/${settingsOptions.DISABLE_PHONE_LOGIN}`, { value: "true" }, { headers: { Authorization: `Bearer ${adminToken}` } });
+        expect(response.status).toEqual(200);
+      }catch(error){
+        console.log(error);
+      }
+    });
+  });
+
+  // try to login with phone
+  describe('[POST] /login/phone', () => {
+    it('phone login should be disabled', async () => {
+      try{
+      const response = await axios.post(`${apiUrl}/auth/login/phone`, userData);
+      }catch(error){
+      expect(error.response.status).toEqual(403);
       }
     });
   });
