@@ -37,6 +37,12 @@ const createGroupUserToken = (user: User, groupUser: GroupUser): TokenData => {
     groupSub: groupUser.groupID.toString(),
     groupRole: groupUser.userRole,
   };
+  const secretKey: string = SECRET_KEY;
+  const expiresIn: number = Number(EXPIRES_IN);
+
+  return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
+};
+
 
 const createVerifactionToken = (user: User): string => {
   const dataStoredInToken: verifactionToken = {
