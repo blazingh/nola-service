@@ -18,42 +18,61 @@ const createCookie = (tokenData: TokenData): string => {
 @Service()
 @EntityRepository()
 export class AuthService extends Repository<UserEntity> {
-  // signup user with email or phone
-  public async signup(userData: User): Promise<User> {
-    if (!userData.email && !userData.phone) throw new HttpException(409, 'Please provide email or phone');
 
-    const findEmail: User = await UserEntity.findOne({ where: { email: userData.email } });
-    if (findEmail) throw new HttpException(409, `This email ${userData.email} already exists`);
+  // signup with email
+  public async signupWithEmail(userData: User): Promise<User> {
+    const findUser: User = await UserEntity.findOne({ where: { email: userData.email } });
 
-    const findPhone: User = await UserEntity.findOne({ where: { phone: userData.phone } });
-    if (findPhone) throw new HttpException(409, `This phone ${userData.phone} already exists`);
+    if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
 
     const hashedPassword = await hash(userData.password, 10);
 
     const createUserData: User = await UserEntity.create({
       ...userData,
       password: hashedPassword,
-      role: 'athenticated',
-      active: true,
-      emailVerified: false,
-      phoneVerified: false,
-      adminVerified: false,
     }).save();
 
     return createUserData;
   }
 
-  // login user with email or phone
-  public async login(userData: User): Promise<{ cookie: string; findUser: User }> {
-    if (!userData.email && !userData.phone) throw new HttpException(409, 'Please provide email or phone');
+  // signup with phone
+  public async signupWithPhone(userData: User): Promise<User> {
+    const findUser: User = await UserEntity.findOne({ where: { phone: userData.phone } });
 
-    if (userData.email && userData.phone) throw new HttpException(409, 'Please provide only email or phone');
+    if (findUser) throw new HttpException(409, `This phone ${userData.phone} already exists`);
 
-    const searchField = userData.email ? 'email' : 'phone';
+    const hashedPassword = await hash(userData.password, 10);
 
-    const findUser: User = await UserEntity.findOne({ where: { [searchField]: userData[searchField] } });
+    const createUserData: User = await UserEntity.create({
+      ...userData,
+      password: hashedPassword,
+    }).save();
 
-    if (!findUser) throw new HttpException(409, `This ${searchField} ${userData[searchField]} was not found`);
+    return createUserData;
+  }
+
+  // email login
+  public async loginWithEmail(userData: User): Promise<{ cookie: string; findUser: User }> {
+    const findUser: User = await UserEntity.findOne({ where: { email: userData.email } });
+
+    if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
+
+    const isPasswordMatching: boolean = await compare(userData.password, findUser.password);
+
+    if (!isPasswordMatching) throw new HttpException(409, 'Password not matching');
+
+    const tokenData = createUserToken(findUser);
+
+    const cookie = createCookie(tokenData);
+  
+    return { cookie, findUser };
+  }
+
+  // phone login
+  public async loginWithPhone(userData: User): Promise<{ cookie: string; findUser: User }> {
+    const findUser: User = await UserEntity.findOne({ where: { phone: userData.phone } });
+    
+    if (!findUser) throw new HttpException(409, `This phone ${userData.phone} was not found`);
 
     const isPasswordMatching: boolean = await compare(userData.password, findUser.password);
 
@@ -66,7 +85,35 @@ export class AuthService extends Repository<UserEntity> {
     return { cookie, findUser };
   }
 
-  public async loginToGroup(userID: string, groupId: string): Promise<{ cookie: string; findUser: User, findGroupUser: GroupUser }> {
+  // email login no password
+  public async loginWithEmailNoPassword(userData: User): Promise<{ cookie: string; findUser: User }> {
+    const findUser: User = await UserEntity.findOne({ where: { email: userData.email } });
+
+    if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
+
+    const tokenData = createUserToken(findUser);
+
+    const cookie = createCookie(tokenData);
+
+    return { cookie, findUser };
+  }
+
+  // phone login no password
+  public async loginWithPhoneNoPassword(userData: User): Promise<{ cookie: string; findUser: User }> {
+    const findUser: User = await UserEntity.findOne({ where: { phone: userData.phone } });
+    
+    if (!findUser) throw new HttpException(409, `This phone ${userData.phone} was not found`);
+
+    const tokenData = createUserToken(findUser);
+
+    const cookie = createCookie(tokenData);
+
+    return { cookie, findUser };
+
+  }
+
+  // login to group
+  public async GroupLogin(userID: string, groupId: string): Promise<{ cookie: string; findUser: User, findGroupUser: GroupUser }> {
     
     const findUser: User = await UserEntity.findOne({ where: { id: userID } });
 
@@ -81,7 +128,6 @@ export class AuthService extends Repository<UserEntity> {
     const cookie = createCookie(tokenData);
 
     return { cookie, findUser, findGroupUser };
-
   }
 
   public async logout(userData: User): Promise<User> {
@@ -92,7 +138,7 @@ export class AuthService extends Repository<UserEntity> {
   }
 
   // generate a link to verify email or phone when the link is clicked, the user will be verified
-  public async generateVerificationLink(userData: User, method: string): Promise<string> {
+  public async generateVerificationToken(userData: User, method: string): Promise<string> {
     if (method === 'email') {
       const findUser: User = await UserEntity.findOne({ where: { email: userData.email } });
       if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
@@ -101,11 +147,9 @@ export class AuthService extends Repository<UserEntity> {
 
       const verifactionToken = createVerifactionToken(findUser);
 
-      const verifacaionLink = `${APP_URL}/auth/verify/${verifactionToken}`;
-
       await UserEntity.update(findUser.id, { ...findUser, verifyEmailToken: verifactionToken });
 
-      return verifacaionLink;
+      return verifactionToken;
     }
 
     if (method === 'phone') {
@@ -117,18 +161,16 @@ export class AuthService extends Repository<UserEntity> {
 
       const verifactionToken = createVerifactionToken(findUser);
 
-      const verifacaionLink = `${APP_URL}/auth/verify/${verifactionToken}`;
-
       await UserEntity.update(findUser.id, { ...findUser, verifyEmailToken: verifactionToken });
 
-      return verifacaionLink;
+      return verifactionToken;
     }
 
     throw new HttpException(409, `This method ${method} is not supported`);
   }
 
   // verify user email or phone with token generated by generateVerificationLink
-  public async verifyUserToken(token: string): Promise<User> {
+  public async verifyUserWithToken(token: string): Promise<User> {
     const decodedToken = (await verify(token, SECRET_KEY)) as verifactionToken;
 
     const findUser: User = await UserEntity.findOne({ where: { id: decodedToken.sub } });
@@ -154,19 +196,17 @@ export class AuthService extends Repository<UserEntity> {
     return findUser;
   }
 
-  // generate a link to reset password when the link is clicked, the user will be redirected to a page spedified in the env file
-  public async generateResetPasswordLink(userData: User): Promise<string> {
+  // generate a token  to reset user password when the link is clicked, the user will be able to reset password
+  public async generateResetPasswordToken(userData: User): Promise<string> {
     const findUser: User = await UserEntity.findOne({ where: { id: userData.id } });
 
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
     const verifactionToken = createVerifactionToken(findUser);
 
-    const verifacaionLink = `${APP_URL}/auth/reset-password/${verifactionToken}`;
-
     await UserEntity.update(findUser.id, { ...findUser, resetPasswordToken: verifactionToken });
 
-    return verifacaionLink;
+    return verifactionToken;
   }
 
   // reset user password with token generated by generateResetPasswordLink

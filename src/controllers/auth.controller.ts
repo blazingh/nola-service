@@ -4,6 +4,9 @@ import { RequestWithUser } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
 import { AuthService } from '@services/auth.service';
 import MailHelper from '@/utils/mailHelper';
+import { SettingEntity } from '@/entities/settings.entity';
+import { settingsOptions } from '@/enums/settings';
+import { APP_URL } from '@/config';
 
 export class AuthController {
   public auth = Container.get(AuthService);
@@ -13,17 +16,43 @@ export class AuthController {
   public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userData: User = req.body;
-      const signUpUserData: User = await this.auth.signup(userData);
+      const method = req.params.method;
 
-      const verifactionLink = await this.auth.generateVerificationLink(signUpUserData, 'email');
+      if (method === 'email') {
+        const EmailSignup = await SettingEntity.findOne({ where: { name: settingsOptions.DISABLE_EMAIL_SIGNUP } });
 
-      const mail = await this.transporter.sendMail({
-        to: signUpUserData.email,
-        subject: 'Verify Email',
-        html: `<a href="${verifactionLink}">Verify Email</a>`,
-      });
+        if (EmailSignup?.value === 'true') throw new Error('Email signup is disabled');
 
-      res.status(201).json({ data: signUpUserData, message: mail.response });
+        const signUpUserData: User = await this.auth.signupWithEmail(userData);
+
+        const verifactionToken = await this.auth.generateVerificationToken(signUpUserData, 'email');
+
+        const verifactionLink = `${APP_URL}/${verifactionToken}`;
+
+        const mail = await this.transporter.sendMail({
+          to: signUpUserData.email,
+          subject: 'Verify Email',
+          html: `<a href="${verifactionLink}">Verify Email</a>`,
+        });
+
+        res.status(201).json({ data: signUpUserData, message: mail.response });
+      }
+      if (method === 'phone') {
+        const PhoneSignup = await SettingEntity.findOne({ where: { name: settingsOptions.DISABLE_PHONE_SIGNUP } });
+
+        if (PhoneSignup?.value === 'true') throw new Error('Phone signup is disabled');
+
+        const signUpUserData: User = await this.auth.signupWithPhone(userData);
+
+        const verifactionToken = await this.auth.generateVerificationToken(signUpUserData, 'phone');
+
+        const verifactionLink = `${APP_URL}/${verifactionToken}`;
+
+        res.status(201).json({ data: signUpUserData, message: verifactionLink });
+      }
+
+      throw new Error('Invalid signup method');
+
     } catch (error) {
       next(error);
     }
@@ -33,21 +62,43 @@ export class AuthController {
   public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userData: User = req.body;
-      const { cookie, findUser } = await this.auth.login(userData);
+      const method = req. params.method;
+      
+      if (method === 'email') {
+        const EmailLogin = await SettingEntity.findOne({ where: { name: settingsOptions.DISABLE_EMAIL_LOGIN } });
+
+        if (EmailLogin?.value === 'true') throw new Error('Email login is disabled');
+
+        const { cookie, findUser } = await this.auth.loginWithEmail(userData);
+
+        res.setHeader('Set-Cookie', [cookie]);
+        res.status(200).json({ data: findUser, message: 'user logged in' });
+      }
+      if (method === 'phone') {
+        const PhoneLogin = await SettingEntity.findOne({ where: { name: settingsOptions.DISABLE_PHONE_LOGIN } });
+
+        if (PhoneLogin?.value === 'true') throw new Error('Phone login is disabled');
+
+        const { cookie, findUser } = await this.auth.loginWithPhone(userData);
+
 
       res.setHeader('Set-Cookie', [cookie]);
       res.status(200).json({ data: findUser, message: 'user logged in' });
+      }
+
+      throw new Error('Invalid login method');
+
     } catch (error) {
       next(error);
     }
   };
 
   // log a user in to a group
-  public logInToGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public GroupLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { groupID } = req.params;
       const userData: User = req.body;
-      const { cookie, findUser, findGroupUser } = await this.auth.loginToGroup(userData, Number(groupID));
+      const { cookie, findUser, findGroupUser } = await this.auth.GroupLogin(userData, Number(groupID));
 
       res.setHeader('Set-Cookie', [cookie]);
 
