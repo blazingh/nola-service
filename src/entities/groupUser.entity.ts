@@ -1,8 +1,8 @@
-import { Group } from '@/interfaces/group.interface';
+import { Group } from '@/interfaces/groupUser.interface';
 import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
-export class GroupEntity extends BaseEntity implements Group {
+export class GroupUserEntity extends BaseEntity implements Group {
   @PrimaryGeneratedColumn()
   id: number;
 

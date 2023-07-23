@@ -42,6 +42,22 @@ export class AuthController {
     }
   };
 
+  // log a user in to a group
+  public logInToGroup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { groupID } = req.params;
+      const userData: User = req.body;
+      const { cookie, findUser, findGroupUser } = await this.auth.loginToGroup(userData, Number(groupID));
+
+      res.setHeader('Set-Cookie', [cookie]);
+
+      res.status(200).json({ data: { user: findUser, groupUser: findGroupUser }, message: 'user logged in to group' });
+
+    } catch (error) {
+      next(error);
+    }
+  };
+
   // log a user out
   public logOut = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {

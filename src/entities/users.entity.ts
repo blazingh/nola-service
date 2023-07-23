@@ -69,4 +69,19 @@ export class UserEntity extends BaseEntity implements User {
     nullable: true,
   })
   verifyPhoneToken: string;
+
+  @Column({
+    nullable: true,
+  })
+  twoFactorCode: string;
+
+  @Column({
+    nullable: true,
+  })
+  twoFactorCodeExpire: Date;
+
+  @Column({
+    nullable: true,
+  })
+  twoFactorEnabled: boolean;
 }

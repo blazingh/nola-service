@@ -1,8 +1,6 @@
 to do 
 
-- make sure users can inject additional paramaters
-
-- creat tests
+- create tests
 
 - add phone messaging support
 

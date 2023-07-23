@@ -5,13 +5,16 @@ import { EntityRepository, Repository } from 'typeorm';
 import { APP_URL, EXPIRES_IN, SECRET_KEY } from '@config';
 import { UserEntity } from '@entities/users.entity';
 import { HttpException } from '@/exceptions/httpException';
-import { DataStoredInToken, TokenData, verifactionToken } from '@interfaces/auth.interface';
+import { DataStoredInGroupUserToken, DataStoredInToken, TokenData, verifactionToken } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
+import { GroupUserEntity } from '@/entities/groupUser.entity';
+import { GroupUser } from '@/interfaces/groupUser.interface';
 
 const createToken = (user: User): TokenData => {
   const dataStoredInToken: DataStoredInToken = {
     id: user.id,
     sub: user.id.toString(),
+    role: user.role,
     emailVerified: user.emailVerified,
     phoneVerified: user.phoneVerified,
     adminVerified: user.adminVerified,
@@ -21,6 +24,19 @@ const createToken = (user: User): TokenData => {
 
   return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
 };
+
+const createGroupUserToken = (user: User, groupUser: GroupUser): TokenData => {
+  const dataStoredInToken: DataStoredInGroupUserToken = {
+    id: user.id,
+    sub: user.id.toString(),
+    role: user.role,
+    emailVerified: user.emailVerified,
+    phoneVerified: user.phoneVerified,
+    adminVerified: user.adminVerified,
+    groupID: groupUser.groupID,
+    groupSub: groupUser.groupID.toString(),
+    groupRole: groupUser.userRole,
+  };
 
 const createVerifactionToken = (user: User): string => {
   const dataStoredInToken: verifactionToken = {
@@ -90,6 +106,24 @@ export class AuthService extends Repository<UserEntity> {
     const cookie = createCookie(tokenData);
 
     return { cookie, findUser };
+  }
+
+  public async loginToGroup(userID: string, groupId: string): Promise<{ cookie: string; findUser: User, findGroupUser: GroupUser }> {
+    
+    const findUser: User = await UserEntity.findOne({ where: { id: userID } });
+
+    if (!findUser) throw new HttpException(409, `This user ${userID} was not found`);
+
+    const findGroupUser: GroupUser = await GroupUserEntity.findOne({ where: { groupID: groupId, userId: findUser.id } });
+
+    if (!findGroupUser) throw new HttpException(409, `This user ${findUser.id} is not a member of group ${groupId}`);
+
+    const tokenData = createGroupUserToken(findUser, findGroupUser);
+
+    const cookie = createCookie(tokenData);
+
+    return { cookie, findUser, findGroupUser };
+
   }
 
   public async logout(userData: User): Promise<User> {

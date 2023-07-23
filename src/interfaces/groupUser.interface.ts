@@ -1,4 +1,4 @@
-export interface Group {
+export interface GroupUser {
   id?: number;
 
   groupID?: string;

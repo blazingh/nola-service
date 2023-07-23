@@ -20,9 +20,29 @@ export class UserService extends Repository<UserEntity> {
     return findUser;
   }
 
+  public async findUserByEmail(email: string): Promise<User> {
+    const findUser: User = await UserEntity.findOne({ where: { email } });
+    if (!findUser) throw new HttpException(409, "User doesn't exist");
+    
+    return findUser;
+  }
+
+  public async findUserByPhone(phone: string): Promise<User> {
+    const findUser: User = await UserEntity.findOne({ where: { phone } });
+    if (!findUser) throw new HttpException(409, "User doesn't exist");
+    
+    return findUser;
+  }
+
   public async createUser(userData: User): Promise<User> {
+
     const findUser: User = await UserEntity.findOne({ where: { email: userData.email } });
+
     if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
+
+    const findPhone: User = await UserEntity.findOne({ where: { phone: userData.phone } });
+
+    if (findPhone) throw new HttpException(409, `This phone ${userData.phone} already exists`);
 
     const hashedPassword = await hash(userData.password, 10);
     const createUserData: User = await UserEntity.create({ ...userData, password: hashedPassword }).save();
