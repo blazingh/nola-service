@@ -17,7 +17,7 @@ const createToken = (user: User): TokenData => {
     adminVerified: user.adminVerified,
   };
   const secretKey: string = SECRET_KEY;
-  const expiresIn: number = EXPIRES_IN;
+  const expiresIn: number = Number(EXPIRES_IN);
 
   return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
 };

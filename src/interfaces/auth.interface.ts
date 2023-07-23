@@ -1,4 +1,4 @@
-import e, { Request } from 'express';
+import { Request } from 'express';
 import { User } from '@interfaces/users.interface';
 
 export interface DataStoredInToken {
