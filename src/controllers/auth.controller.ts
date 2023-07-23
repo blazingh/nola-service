@@ -35,7 +35,7 @@ export class AuthController {
           html: `<a href="${verifactionLink}">Verify Email</a>`,
         });
 
-        res.status(201).json({ data: signUpUserData, message: mail.response });
+        res.status(201).json({ data: signUpUserData, message: mail.response, token: verifactionToken });
       }
       if (method === 'phone') {
         const PhoneSignup = await SettingEntity.findOne({ where: { name: settingsOptions.DISABLE_PHONE_SIGNUP } });
@@ -48,7 +48,7 @@ export class AuthController {
 
         const verifactionLink = `${APP_URL}/${verifactionToken}`;
 
-        res.status(201).json({ data: signUpUserData, message: verifactionLink });
+        res.status(201).json({ data: signUpUserData, message: verifactionLink, token: verifactionToken });
       }
 
       throw new Error('Invalid signup method');
