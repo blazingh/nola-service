@@ -1,4 +1,4 @@
-import { EXPIRES_IN, SECRET_KEY } from "@/config";
+import { ADMIN_ROLE, EXPIRES_IN, SECRET_KEY } from "@/config";
 import { DataStoredInGroupUserToken, DataStoredInUserToken, TokenData, verifactionToken } from "@/interfaces/auth.interface";
 import { GroupUser } from "@/interfaces/groupUser.interface";
 import { User } from "@/interfaces/users.interface";
@@ -52,3 +52,19 @@ export  const createVerifactionToken = (user: User): string => {
   
     return token;
   };
+
+export const createAdminToken = (): TokenData => {
+    const dataStoredInToken: DataStoredInUserToken = {
+      id: 1,
+      sub: '1',
+      role: ADMIN_ROLE,
+      emailVerified: true,
+      phoneVerified: true,
+      adminVerified: true,
+    };
+    const secretKey: string = SECRET_KEY;
+    const expiresIn: number = 10 * 60;
+  
+    return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
+  }
+

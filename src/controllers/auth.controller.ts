@@ -100,7 +100,7 @@ export class AuthController {
     try {
       const { groupID } = req.params;
       const userData: User = req.body;
-      const { cookie, findUser, findGroupUser } = await this.auth.GroupLogin(userData, Number(groupID));
+      const { cookie, findUser, findGroupUser } = await this.auth.GroupLogin(userData.id, groupID);
 
       res.setHeader('Set-Cookie', [cookie]);
 
@@ -128,7 +128,9 @@ export class AuthController {
   public sendResetPassword = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userData: User = req.user;
-      const resetPasswordLink = await this.auth.generateResetPasswordLink(userData);
+      const resetPasswordToken = await this.auth.generateResetPasswordToken(userData);
+
+      const resetPasswordLink = `${APP_URL}/reset-password/${resetPasswordToken}`;
 
       const mail = await this.transporter.sendMail({
         to: userData.email,
@@ -146,7 +148,7 @@ export class AuthController {
   public verifyUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { token } = req.params;
-      const userData: User = await this.auth.verifyUserToken(token);
+      const userData: User = await this.auth.verifyUserWithToken(token);
       res.status(200).json({ data: userData, message: 'user verified' });
     } catch (error) {
       next(error);

@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 
 class MailHelper {
   public static transporter = nodemailer.createTransport({
+    // @ts-ignore
     host: MAIL_HOST,
     port: MAIL_PORT,
     auth: {

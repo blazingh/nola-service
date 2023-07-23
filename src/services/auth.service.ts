@@ -113,7 +113,7 @@ export class AuthService extends Repository<UserEntity> {
   }
 
   // login to group
-  public async GroupLogin(userID: string, groupId: string): Promise<{ cookie: string; findUser: User, findGroupUser: GroupUser }> {
+  public async GroupLogin(userID: number, groupId: string): Promise<{ cookie: string; findUser: User, findGroupUser: GroupUser }> {
     
     const findUser: User = await UserEntity.findOne({ where: { id: userID } });
 

@@ -3,7 +3,7 @@ import { verify } from 'jsonwebtoken';
 import { ADMIN_ROLE, SECRET_KEY } from '@config';
 import { UserEntity } from '@entities/users.entity';
 import { HttpException } from '@/exceptions/httpException';
-import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
+import { DataStoredInUserToken, RequestWithUser } from '@interfaces/auth.interface';
 
 const getAuthorization = req => {
   const coockie = req.cookies['Authorization'];
@@ -20,7 +20,7 @@ export const AuthMiddleware = async (req: RequestWithUser, res: Response, next: 
     const Authorization = getAuthorization(req);
 
     if (Authorization) {
-      const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
+      const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInUserToken;
       const findUser = await UserEntity.findOne(id);
 
       if (findUser) {
@@ -45,12 +45,15 @@ export const AdminMiddleware = async (req: RequestWithUser, res: Response, next:
       next(new HttpException(404, 'Authentication token missing'));
     }
 
-    const { role } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
+    const { role } = (await verify(Authorization, SECRET_KEY)) as DataStoredInUserToken;
 
     if (role !== ADMIN_ROLE) {
       next(new HttpException(401, 'Wrong authentication token'));
-    }
+    } 
+      next();
+    
   } catch (error) {
+    console.log(error);
     next(new HttpException(401, 'Wrong authentication token'));
   }
 };

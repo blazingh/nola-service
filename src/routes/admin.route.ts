@@ -6,7 +6,7 @@ import { AdminController } from '@/controllers/admin.controller';
 import { AdminCreateUserDto, AdminUpdateSettingDto } from '@/dtos/admin.dto';
 
 
-export class UserRoute implements Routes {
+export class AdminRoute implements Routes {
   public path = '/admin';
   public router = Router();
   public adminControler = new AdminController();

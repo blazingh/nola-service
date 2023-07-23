@@ -1,77 +1,90 @@
-import bcrypt from 'bcrypt';
-import request from 'supertest';
-import { createConnection, getConnection, Repository } from 'typeorm';
-import { App } from '@/app';
-import { dbConnection } from '@database';
-import { CreateUserDto } from '@dtos/users.dto';
-import { UserEntity } from '@entities/users.entity';
-import { AuthRoute } from '@routes/auth.route';
+import { createAdminToken } from '@/utils/tokenHelper';
+import axios from 'axios';
 
-beforeAll(async () => {
-  await createConnection(dbConnection);
-});
+// Replace this URL with your API endpoint
+const apiUrl = 'http://localhost:3000';
 
-afterAll(async () => {
-  await getConnection().close();
-});
+const {token: adminToken} = createAdminToken();
+
+const userData = {
+  email: 'hadibabaki@hadi.com',
+  phone: '09123456789',
+  password: "q1w2e3r4!"
+};
+
+let userId = 0;
+
+let userToken = ""
 
 describe('Testing Auth', () => {
-  describe('[POST] /signup', () => {
+
+  describe('[POST] /signup/email', () => {
     it('response should have the Create userData', async () => {
-      const userData: CreateUserDto = {
-        email: 'test@email.com',
-        password: 'q1w2e3r4!',
-        phone: '01012345678',
-      };
+      const response = await axios.post(`${apiUrl}/auth/signup/email`, userData);
 
-      const authRoute = new AuthRoute();
-      const userRepository = new Repository<UserEntity>();
+      expect(response.status).toEqual(201);
+      expect(response.data.data).toHaveProperty('id');
+      expect(response.data.data).toHaveProperty('email');
+      expect(response.data.data).toHaveProperty('password');
 
-      userRepository.findOne = jest.fn().mockReturnValue(null);
-      userRepository.save = jest.fn().mockReturnValue({
-        id: 1,
-        email: userData.email,
-        password: await bcrypt.hash(userData.password, 10),
-      });
+      userId = response.data.data.id;
 
-      const app = new App([authRoute]);
-      return request(app.getServer()).post(`${authRoute.path}signup`).send(userData).expect(201);
     });
   });
 
-  describe('[POST] /login', () => {
-    it('response should have the Set-Cookie header with the Authorization token', async () => {
-      const userData: CreateUserDto = {
-        email: 'test@email.com',
-        password: 'q1w2e3r4!',
-        phone: '01012345678',
-      };
+  describe('[POST] /signup/email', () => {
+    it('response should give error for user exist', async () => {
+      try{
+      const response = await axios.post(`${apiUrl}/auth/signup/email`, userData);
 
-      const authRoute = new AuthRoute();
-      const userRepository = new Repository<UserEntity>();
+      console.log(response);
+      }catch(error){
+      expect(error.response.status).toEqual(409);
+      }
 
-      userRepository.findOne = jest.fn().mockReturnValue({
-        id: 1,
-        email: userData.email,
-        password: await bcrypt.hash(userData.password, 10),
-      });
-
-      const app = new App([authRoute]);
-      return request(app.getServer())
-        .post(`${authRoute.path}login`)
-        .send(userData)
-        .expect('Set-Cookie', /^Authorization=.+/);
     });
   });
 
-  // describe('[POST] /logout', () => {
-  //   it('logout Set-Cookie Authorization=; Max-age=0', async () => {
-  //     const authRoute = new AuthRoute();
-  //     const app = new App([authRoute]);
+  describe('[delete] /admin/user', () => {
+    it('response should have the delete userData', async () => {
+      const response = await axios.delete(`${apiUrl}/admin/user/${userId}`, { headers: { Authorization: `Bearer ${adminToken}` } });
 
-  //     return request(app.getServer())
-  //       .post(`${authRoute.path}logout`)
-  //       .expect('Set-Cookie', /^Authorization=\;/);
-  //   });
-  // });
+      expect(response.status).toEqual(200);
+
+    });
+  })
+
+  describe('[POST] /signup/phone', () => {
+    it('response should have the Create userData', async () => {
+      const response = await axios.post(`${apiUrl}/auth/signup/phone`, userData);
+
+      expect(response.status).toEqual(201);
+      expect(response.data.data).toHaveProperty('id');
+      expect(response.data.data).toHaveProperty('phone');
+
+      userId = response.data.data.id;
+    });
+  });
+
+  describe('[POST] /signup/phone', () => {
+    it('response should give error for user exist', async () => {
+      try{
+      
+      const response = await axios.post(`${apiUrl}/auth/signup/phone`, userData);
+
+      }catch(error){
+      expect(error.response.status).toEqual(409);
+      }
+    });
+  });
+
+  describe('[delete] /admin/user', () => {
+    it('response should have the delete userData', async () => {
+      const response = await axios.delete(`${apiUrl}/admin/user/${userId}`, { headers: { Authorization: `Bearer ${adminToken}` } });
+
+      expect(response.status).toEqual(200);
+
+    })
+  })
+
 });
