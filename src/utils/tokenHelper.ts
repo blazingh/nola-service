@@ -14,7 +14,7 @@ export const createUserToken = (user: User): TokenData => {
       adminVerified: user.adminVerified,
     };
     const secretKey: string = SECRET_KEY;
-    const expiresIn: number = Number(EXPIRES_IN);
+    const expiresIn = EXPIRES_IN;
   
     return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
   };
@@ -32,7 +32,7 @@ export  const createGroupUserToken = (user: User, groupUser: GroupUser): TokenDa
       groupRole: groupUser.userRole,
     };
     const secretKey: string = SECRET_KEY;
-    const expiresIn: number = Number(EXPIRES_IN);
+    const expiresIn = EXPIRES_IN;
   
     return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
   };
@@ -46,7 +46,7 @@ export  const createVerifactionToken = (user: User): string => {
     };
   
     const secretKey: string = SECRET_KEY;
-    const expiresIn: number = 15 * 60;
+    const expiresIn = 15 * 60;
   
     const token = sign(dataStoredInToken, secretKey, { expiresIn });
   
@@ -63,7 +63,7 @@ export const createAdminToken = (): TokenData => {
       adminVerified: true,
     };
     const secretKey: string = SECRET_KEY;
-    const expiresIn: number = 10 * 60;
+    const expiresIn = 10 * 60;
   
     return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
   }

@@ -70,9 +70,13 @@ export class AuthController {
       if (method === 'email') {
         const EmailLogin = await SettingEntity.findOne({ where: { name: settingsOptions.DISABLE_EMAIL_LOGIN } });
 
-        if (EmailLogin?.value === 'true') throw new HttpException(403, 'Email login is disabled');
+        const UnverifiedEmailLogin = await SettingEntity.findOne({ where: { name: settingsOptions.ALLOW_UNVERIFIED_EMAIL_LOGIN } });
 
+        if (EmailLogin?.value === 'true') throw new HttpException(403, 'Email login is disabled');
+        
         const { cookie, findUser } = await this.auth.loginWithEmail(userData);
+
+        if (UnverifiedEmailLogin?.value === 'false' && !findUser.isVerified) throw new HttpException(403, 'Email is not verified');
 
         res.setHeader('Set-Cookie', [cookie]);
         res.status(200).json({ data: findUser, message: 'user logged in' });
