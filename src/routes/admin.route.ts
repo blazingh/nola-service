@@ -32,7 +32,7 @@ export class AdminRoute implements Routes {
     // get setting by name
     this.router.get(`${this.path}/setting/:name`, AdminMiddleware, this.adminControler.getSettingByName);
     // update setting
-    this.router.put(`${this.path}/setting/:id`, AdminMiddleware, ValidationMiddleware(AdminUpdateSettingDto), this.adminControler.updateSetting);
+    this.router.put(`${this.path}/setting/:name`, AdminMiddleware, ValidationMiddleware(AdminUpdateSettingDto), this.adminControler.updateSetting);
 
     // get all group users
     this.router.get(`${this.path}/group-user`, AdminMiddleware, this.adminControler.getGroupUsers);

@@ -43,8 +43,5 @@ export class AdminCreateUserDto {
 
   export class AdminUpdateSettingDto {
     @IsNotEmpty()
-    public name: string;
-
-    @IsNotEmpty()
     public value: string;
   }

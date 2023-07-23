@@ -68,7 +68,8 @@ export class AdminController {
   public updateSetting = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const settingsData = req.body;
-      const updateSettingsData = await this.settings.updateSettings(settingsData);
+      const name = req.params.name;
+      const updateSettingsData = await this.settings.updateSetting(name, settingsData);
 
       res.status(200).json({ data: updateSettingsData, message: 'updated settings' });
     } catch (error) {

@@ -7,6 +7,7 @@ import MailHelper from '@/utils/mailHelper';
 import { SettingEntity } from '@/entities/settings.entity';
 import { settingsOptions } from '@/enums/settings';
 import { APP_URL } from '@/config';
+import { HttpException } from '@/exceptions/httpException';
 
 export class AuthController {
   public auth = Container.get(AuthService);
@@ -21,7 +22,7 @@ export class AuthController {
       if (method === 'email') {
         const EmailSignup = await SettingEntity.findOne({ where: { name: settingsOptions.DISABLE_EMAIL_SIGNUP } });
 
-        if (EmailSignup?.value) throw new Error('Email signup is disabled');
+        if (EmailSignup?.value === "true" ) throw new HttpException(403, 'Email signup is disabled');
 
         const signUpUserData: User = await this.auth.signupWithEmail(userData);
 
@@ -41,7 +42,7 @@ export class AuthController {
       if (method === 'phone') {
         const PhoneSignup = await SettingEntity.findOne({ where: { name: settingsOptions.DISABLE_PHONE_SIGNUP } });
 
-        if (PhoneSignup?.value === 'true') throw new Error('Phone signup is disabled');
+        if (PhoneSignup?.value === 'true') throw new HttpException(403, 'Phone signup is disabled');
 
         const signUpUserData: User = await this.auth.signupWithPhone(userData);
 
@@ -53,7 +54,7 @@ export class AuthController {
       return;
       }
 
-      throw new Error('Invalid signup method');
+      throw new HttpException(403, 'Invalid signup method');
 
     } catch (error) {
       next(error);
@@ -69,7 +70,7 @@ export class AuthController {
       if (method === 'email') {
         const EmailLogin = await SettingEntity.findOne({ where: { name: settingsOptions.DISABLE_EMAIL_LOGIN } });
 
-        if (EmailLogin?.value === 'true') throw new Error('Email login is disabled');
+        if (EmailLogin?.value === 'true') throw new HttpException(403, 'Email login is disabled');
 
         const { cookie, findUser } = await this.auth.loginWithEmail(userData);
 
@@ -79,7 +80,7 @@ export class AuthController {
       if (method === 'phone') {
         const PhoneLogin = await SettingEntity.findOne({ where: { name: settingsOptions.DISABLE_PHONE_LOGIN } });
 
-        if (PhoneLogin?.value === 'true') throw new Error('Phone login is disabled');
+        if (PhoneLogin?.value === 'true') throw new HttpException(403, 'Phone login is disabled');
 
         const { cookie, findUser } = await this.auth.loginWithPhone(userData);
 
@@ -88,7 +89,7 @@ export class AuthController {
       res.status(200).json({ data: findUser, message: 'user logged in' });
       }
 
-      throw new Error('Invalid login method');
+      throw new HttpException(403, 'Invalid login method');
 
     } catch (error) {
       next(error);

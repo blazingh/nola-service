@@ -40,13 +40,13 @@ export class SettingService extends Repository<SettingEntity> {
   }
 
   // update setting
-  public async updateSetting(SettingId: number, SettingData: Setting): Promise<Setting> {
-    const findSetting: Setting = await SettingEntity.findOne({ where: { id: SettingId } });
+  public async updateSetting(SettingName: string, SettingData: Setting): Promise<Setting> {
+    const findSetting: Setting = await SettingEntity.findOne({ where: { name: SettingName } });
     if (!findSetting) throw new HttpException(409, "Setting doesn't exist");
 
-    await SettingEntity.update(SettingId, { ...SettingData });
+    await SettingEntity.update(findSetting.id, { ...SettingData });
 
-    const updateSetting: Setting = await SettingEntity.findOne({ where: { id: SettingId } });
+    const updateSetting: Setting = await SettingEntity.findOne({ where: { id: findSetting.id } });
     return updateSetting;
   }
 
