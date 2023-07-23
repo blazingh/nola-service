@@ -1,10 +1,10 @@
 export interface User {
-  id?: number;
+  id: number;
   email?: string;
   phone?: string;
   password: string;
-  role?: string;
-  active?: boolean;
+  role: string;
+  active: boolean;
   emailVerified?: boolean;
   phoneVerified?: boolean;
   adminVerified?: boolean;

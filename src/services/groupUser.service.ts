@@ -15,7 +15,7 @@ export class GroupUserService extends Repository<GroupUserEntity> {
 
   // find groupUser by id
   public async findGroupUserById(GroupUserId: number): Promise<GroupUser> {
-    const findGroupUser: GroupUser = await GroupUserEntity.findOne({ where: { id: GroupUserId } });
+    const findGroupUser = await GroupUserEntity.findOne({ where: { id: GroupUserId } });
     if (!findGroupUser) throw new HttpException(409, "GroupUser doesn't exist");
 
     return findGroupUser;
@@ -23,7 +23,7 @@ export class GroupUserService extends Repository<GroupUserEntity> {
 
   // find groupUser by groupID and userId
   public async findGroupUserPair(GroupId: string, UserId: number): Promise<GroupUser> {
-    const findGroupUser: GroupUser = await GroupUserEntity.findOne({ where: { groupID: GroupId, userId: UserId } });
+    const findGroupUser = await GroupUserEntity.findOne({ where: { groupID: GroupId, userId: UserId } });
     if (!findGroupUser) throw new HttpException(409, "GroupUser doesn't exist");
     
     return findGroupUser;
@@ -31,7 +31,7 @@ export class GroupUserService extends Repository<GroupUserEntity> {
 
   // create groupUser
   public async createGroupUser(GroupUserData: GroupUser): Promise<GroupUser> {
-    const findGroupUser: GroupUser = await GroupUserEntity.findOne({ where: { groupID: GroupUserData.groupID, userId: GroupUserData.userId } });
+    const findGroupUser = await GroupUserEntity.findOne({ where: { groupID: GroupUserData.groupID, userId: GroupUserData.userId } });
     if (findGroupUser) throw new HttpException(409, `This groupID ${GroupUserData.groupID} and userId ${GroupUserData.userId} already exists`);
 
     const createGroupUserData: GroupUser = await GroupUserEntity.create({ ...GroupUserData }).save();
@@ -41,19 +41,21 @@ export class GroupUserService extends Repository<GroupUserEntity> {
 
   // update groupUser
   public async updateGroupUser(GroupUserId: number, GroupUserData: GroupUser): Promise<GroupUser> {
-    const findGroupUser: GroupUser = await GroupUserEntity.findOne({ where: { id: GroupUserId } });
+    const findGroupUser = await GroupUserEntity.findOne({ where: { id: GroupUserId } });
     if (!findGroupUser) throw new HttpException(409, "GroupUser doesn't exist");
 
     await GroupUserEntity.update(GroupUserId, { ...GroupUserData });
 
-    const updateGroupUser: GroupUser = await GroupUserEntity.findOne({ where: { id: GroupUserId } });
+    const updateGroupUser = await GroupUserEntity.findOne({ where: { id: GroupUserId } });
 
-    return updateGroupUser;
+    if (!updateGroupUser) throw new HttpException(409, "GroupUser doesn't exist");
+
+    return updateGroupUser ;
   }
 
   // delete groupUser
   public async deleteGroupUser(GroupUserId: number): Promise<GroupUser> {
-    const findGroupUser: GroupUser = await GroupUserEntity.findOne({ where: { id: GroupUserId } });
+    const findGroupUser = await GroupUserEntity.findOne({ where: { id: GroupUserId } });
     if (!findGroupUser) throw new HttpException(409, "GroupUser doesn't exist");
 
     await GroupUserEntity.delete({ id: GroupUserId });

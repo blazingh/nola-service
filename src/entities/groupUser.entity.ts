@@ -4,22 +4,22 @@ import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, U
 @Entity()
 export class GroupUserEntity extends BaseEntity implements GroupUser {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  groupID: string;
+  groupID!: string;
 
   @Column()
-  userId: number;
+  userId!: number;
 
   @Column()
   userRole?: string;
 
   @Column()
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @Column()
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

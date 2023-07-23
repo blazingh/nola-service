@@ -76,7 +76,7 @@ export class AuthController {
         
         const { cookie, findUser } = await this.auth.loginWithEmail(userData);
 
-        if (UnverifiedEmailLogin?.value === 'false' && !findUser.isVerified) throw new HttpException(403, 'Email is not verified');
+        if (UnverifiedEmailLogin?.value === 'false' && !findUser.emailVerified) throw new HttpException(403, 'Email is not verified');
 
         res.setHeader('Set-Cookie', [cookie]);
         res.status(200).json({ data: findUser, message: 'user logged in' });
@@ -105,7 +105,7 @@ export class AuthController {
     try {
       const { groupID } = req.params;
       const userData: User = req.body;
-      const { cookie, findUser, findGroupUser } = await this.auth.GroupLogin(userData.id, groupID);
+      const { cookie, findUser, findGroupUser } = await this.auth.GroupLogin(userData.id || 0 , groupID);
 
       res.setHeader('Set-Cookie', [cookie]);
 
@@ -117,9 +117,10 @@ export class AuthController {
   };
 
   // log a user out
-  public logOut = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+  public logOut = async (req : Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: User = req.user;
+      const request = req as RequestWithUser;
+      const userData: User = request.user;
       const logOutUserData: User = await this.auth.logout(userData);
 
       res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
@@ -130,9 +131,10 @@ export class AuthController {
   };
 
   // send reset password link to user email
-  public sendResetPassword = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+  public sendResetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: User = req.user;
+      const request = req as RequestWithUser;
+      const userData: User = request.user;
       const resetPasswordToken = await this.auth.generateResetPasswordToken(userData);
 
       const resetPasswordLink = `${APP_URL}/reset-password/${resetPasswordToken}`;

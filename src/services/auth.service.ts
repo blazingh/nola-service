@@ -2,7 +2,7 @@ import { compare, hash } from 'bcrypt';
 import { verify } from 'jsonwebtoken';
 import { Service } from 'typedi';
 import { EntityRepository, Repository } from 'typeorm';
-import { APP_URL, SECRET_KEY } from '@config';
+import {  SECRET_KEY } from '@config';
 import { UserEntity } from '@entities/users.entity';
 import { HttpException } from '@/exceptions/httpException';
 import {  TokenData, verifactionToken } from '@interfaces/auth.interface';
@@ -21,7 +21,7 @@ export class AuthService extends Repository<UserEntity> {
 
   // signup with email
   public async signupWithEmail(userData: User): Promise<User> {
-    const findUser: User = await UserEntity.findOne({ where: { email: userData.email } });
+    const findUser = await UserEntity.findOne({ where: { email: userData.email } });
 
     if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
 
@@ -37,7 +37,7 @@ export class AuthService extends Repository<UserEntity> {
 
   // signup with phone
   public async signupWithPhone(userData: User): Promise<User> {
-    const findUser: User = await UserEntity.findOne({ where: { phone: userData.phone } });
+    const findUser = await UserEntity.findOne({ where: { phone: userData.phone } });
 
     if (findUser) throw new HttpException(409, `This phone ${userData.phone} already exists`);
 
@@ -53,7 +53,7 @@ export class AuthService extends Repository<UserEntity> {
 
   // email login
   public async loginWithEmail(userData: User): Promise<{ cookie: string; findUser: User }> {
-    const findUser: User = await UserEntity.findOne({ where: { email: userData.email } });
+    const findUser = await UserEntity.findOne({ where: { email: userData.email } });
 
     if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
 
@@ -70,7 +70,7 @@ export class AuthService extends Repository<UserEntity> {
 
   // phone login
   public async loginWithPhone(userData: User): Promise<{ cookie: string; findUser: User }> {
-    const findUser: User = await UserEntity.findOne({ where: { phone: userData.phone } });
+    const findUser = await UserEntity.findOne({ where: { phone: userData.phone } });
     
     if (!findUser) throw new HttpException(409, `This phone ${userData.phone} was not found`);
 
@@ -87,7 +87,7 @@ export class AuthService extends Repository<UserEntity> {
 
   // email login no password
   public async loginWithEmailNoPassword(userData: User): Promise<{ cookie: string; findUser: User }> {
-    const findUser: User = await UserEntity.findOne({ where: { email: userData.email } });
+    const findUser = await UserEntity.findOne({ where: { email: userData.email } });
 
     if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
 
@@ -100,7 +100,7 @@ export class AuthService extends Repository<UserEntity> {
 
   // phone login no password
   public async loginWithPhoneNoPassword(userData: User): Promise<{ cookie: string; findUser: User }> {
-    const findUser: User = await UserEntity.findOne({ where: { phone: userData.phone } });
+    const findUser = await UserEntity.findOne({ where: { phone: userData.phone } });
     
     if (!findUser) throw new HttpException(409, `This phone ${userData.phone} was not found`);
 
@@ -114,12 +114,11 @@ export class AuthService extends Repository<UserEntity> {
 
   // login to group
   public async GroupLogin(userID: number, groupId: string): Promise<{ cookie: string; findUser: User, findGroupUser: GroupUser }> {
-    
-    const findUser: User = await UserEntity.findOne({ where: { id: userID } });
+    const findUser = await UserEntity.findOne({ where: { id: userID } });
 
     if (!findUser) throw new HttpException(409, `This user ${userID} was not found`);
 
-    const findGroupUser: GroupUser = await GroupUserEntity.findOne({ where: { groupID: groupId, userId: findUser.id } });
+    const findGroupUser = await GroupUserEntity.findOne({ where: { groupID: groupId, userId: findUser.id } });
 
     if (!findGroupUser) throw new HttpException(409, `This user ${findUser.id} is not a member of group ${groupId}`);
 
@@ -131,7 +130,7 @@ export class AuthService extends Repository<UserEntity> {
   }
 
   public async logout(userData: User): Promise<User> {
-    const findUser: User = await UserEntity.findOne({ where: { email: userData.email, password: userData.password } });
+    const findUser = await UserEntity.findOne({ where: { email: userData.email, password: userData.password } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
     return findUser;
@@ -140,7 +139,7 @@ export class AuthService extends Repository<UserEntity> {
   // generate a link to verify email or phone when the link is clicked, the user will be verified
   public async generateVerificationToken(userData: User, method: string): Promise<string> {
     if (method === 'email') {
-      const findUser: User = await UserEntity.findOne({ where: { email: userData.email } });
+      const findUser = await UserEntity.findOne({ where: { email: userData.email } });
       if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
 
       if (findUser.emailVerified) throw new HttpException(409, `This email ${userData.email} is already verified`);
@@ -153,7 +152,7 @@ export class AuthService extends Repository<UserEntity> {
     }
 
     if (method === 'phone') {
-      const findUser: User = await UserEntity.findOne({ where: { phone: userData.phone } });
+      const findUser = await UserEntity.findOne({ where: { phone: userData.phone } });
 
       if (!findUser) throw new HttpException(409, `This phone ${userData.phone} was not found`);
 
@@ -171,9 +170,9 @@ export class AuthService extends Repository<UserEntity> {
 
   // verify user email or phone with token generated by generateVerificationLink
   public async verifyUserWithToken(token: string): Promise<User> {
-    const decodedToken = (await verify(token, SECRET_KEY)) as verifactionToken;
+    const decodedToken = (await verify(token, SECRET_KEY || "")) as any as verifactionToken;
 
-    const findUser: User = await UserEntity.findOne({ where: { id: decodedToken.sub } });
+    const findUser = await UserEntity.findOne({ where: { id: decodedToken.sub } });
 
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
@@ -181,14 +180,14 @@ export class AuthService extends Repository<UserEntity> {
       if (findUser.emailVerified) throw new HttpException(409, 'User email is already verified');
       if (!findUser.verifyEmailToken || findUser.verifyEmailToken !== token) throw new HttpException(409, 'Invalid token');
       findUser.emailVerified = true;
-      findUser.verifyEmailToken = null;
+      findUser.verifyEmailToken = "";
     }
 
     if (decodedToken.method === 'phone') {
       if (findUser.phoneVerified) throw new HttpException(409, 'User phone is already verified');
       if (!findUser.verifyPhoneToken || findUser.verifyPhoneToken !== token) throw new HttpException(409, 'Invalid token');
       findUser.phoneVerified = true;
-      findUser.verifyPhoneToken = null;
+      findUser.verifyPhoneToken = "";
     }
 
     await UserEntity.update(findUser.id, findUser);
@@ -198,7 +197,7 @@ export class AuthService extends Repository<UserEntity> {
 
   // generate a token  to reset user password when the link is clicked, the user will be able to reset password
   public async generateResetPasswordToken(userData: User): Promise<string> {
-    const findUser: User = await UserEntity.findOne({ where: { id: userData.id } });
+    const findUser = await UserEntity.findOne({ where: { id: userData.id } });
 
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
@@ -211,9 +210,9 @@ export class AuthService extends Repository<UserEntity> {
 
   // reset user password with token generated by generateResetPasswordLink
   public async resetPasswordWithToken(token: string, newPassword: string): Promise<User> {
-    const decodedToken = (await verify(token, SECRET_KEY)) as verifactionToken;
+    const decodedToken = (await verify(token, SECRET_KEY || "")) as any as verifactionToken;
 
-    const findUser: User = await UserEntity.findOne({ where: { id: decodedToken.sub } });
+    const findUser = await UserEntity.findOne({ where: { id: decodedToken.sub } });
 
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
@@ -223,7 +222,7 @@ export class AuthService extends Repository<UserEntity> {
 
     findUser.password = hashedPassword;
 
-    await UserEntity.update(findUser.id, { ...findUser, resetPasswordToken: null });
+    await UserEntity.update(findUser.id, { ...findUser, resetPasswordToken: "" });
 
     return findUser;
   }

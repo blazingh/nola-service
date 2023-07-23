@@ -4,24 +4,24 @@ import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, U
 @Entity()
 export class SettingEntity extends BaseEntity implements Setting {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column({
-  nullable: true,
+    nullable: true,
   })
-  value: string;
+  value!: string;
 
   @Column()
-  description: string;
+  description!: string;
 
   @Column()
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @Column()
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

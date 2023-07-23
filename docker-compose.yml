@@ -14,22 +14,13 @@ services:
 
   server:
     container_name: server
-    build:
-      context: ./
-      dockerfile: Dockerfile.dev
+    image: blazingh/nola-auth-service:0.0.2
     ports:
       - "3000:3000"
-    environment:
-      DB_USER: root
-      DB_PASSWORD: password
-      DB_HOST: pg
-      DB_PORT: 5432
-      DB_DATABASE: dev
     volumes:
-      - ./:/app
-      - /app/node_modules
+      - .env:/app/.env.production
     restart: "unless-stopped"
-    networks:
+    networks: 
       - backend
     links:
       - pg

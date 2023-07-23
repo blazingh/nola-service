@@ -8,14 +8,14 @@ import { Setting } from '@/interfaces/settings.interface';
 @EntityRepository()
 export class SettingService extends Repository<SettingEntity> {
   // find all settings
-  public async findAllSetting(): Promise<Setting[]> {
+  public async findAllSettings(): Promise<Setting[]> {
     const settings: Setting[] = await SettingEntity.find();
     return settings;
   }
 
   // find setting by id
   public async findSettingById(SettingId: number): Promise<Setting> {
-    const findSetting: Setting = await SettingEntity.findOne({ where: { id: SettingId } });
+    const findSetting = await SettingEntity.findOne({ where: { id: SettingId } });
     if (!findSetting) throw new HttpException(409, "Setting doesn't exist");
 
     return findSetting;
@@ -23,7 +23,7 @@ export class SettingService extends Repository<SettingEntity> {
 
   // find setting by name
   public async findSettingByName(SettingName: string): Promise<Setting> {
-    const findSetting: Setting = await SettingEntity.findOne({ where: { name: SettingName } });
+    const findSetting = await SettingEntity.findOne({ where: { name: SettingName } });
     if (!findSetting) throw new HttpException(409, "Setting doesn't exist");
 
     return findSetting;
@@ -31,7 +31,7 @@ export class SettingService extends Repository<SettingEntity> {
 
   // create setting
   public async createSetting(SettingData: Setting): Promise<Setting> {
-    const findSetting: Setting = await SettingEntity.findOne({ where: { name: SettingData.name } });
+    const findSetting = await SettingEntity.findOne({ where: { name: SettingData.name } });
     if (findSetting) throw new HttpException(409, `This name ${SettingData.name} already exists`);
 
     const createSettingData: Setting = await SettingEntity.create({ ...SettingData }).save();
@@ -41,18 +41,21 @@ export class SettingService extends Repository<SettingEntity> {
 
   // update setting
   public async updateSetting(SettingName: string, SettingData: Setting): Promise<Setting> {
-    const findSetting: Setting = await SettingEntity.findOne({ where: { name: SettingName } });
+    const findSetting = await SettingEntity.findOne({ where: { name: SettingName } });
     if (!findSetting) throw new HttpException(409, "Setting doesn't exist");
 
     await SettingEntity.update(findSetting.id, { ...SettingData });
 
-    const updateSetting: Setting = await SettingEntity.findOne({ where: { id: findSetting.id } });
+    const updateSetting = await SettingEntity.findOne({ where: { id: findSetting.id } });
+
+    if (!updateSetting) throw new HttpException(409, "Setting doesn't exist");
+
     return updateSetting;
   }
 
   // delete setting
   public async deleteSetting(SettingId: number): Promise<Setting> {
-    const findSetting: Setting = await SettingEntity.findOne({ where: { id: SettingId } });
+    const findSetting = await SettingEntity.findOne({ where: { id: SettingId } });
     if (!findSetting) throw new HttpException(409, "Setting doesn't exist");
 
     await SettingEntity.delete({ id: SettingId });
@@ -61,7 +64,7 @@ export class SettingService extends Repository<SettingEntity> {
 
   // get setting value
   public async getSettingValue(SettingName: string): Promise<string> {
-    const findSetting: Setting = await SettingEntity.findOne({ where: { name: SettingName } });
+    const findSetting = await SettingEntity.findOne({ where: { name: SettingName } });
     if (!findSetting) throw new HttpException(409, "Setting doesn't exist");
 
     return findSetting.value;

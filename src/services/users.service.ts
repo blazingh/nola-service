@@ -14,21 +14,21 @@ export class UserService extends Repository<UserEntity> {
   }
 
   public async findUserById(userId: number): Promise<User> {
-    const findUser: User = await UserEntity.findOne({ where: { id: userId } });
+    const findUser = await UserEntity.findOne({ where: { id: userId } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
     return findUser;
   }
 
   public async findUserByEmail(email: string): Promise<User> {
-    const findUser: User = await UserEntity.findOne({ where: { email } });
+    const findUser = await UserEntity.findOne({ where: { email } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
     
     return findUser;
   }
 
   public async findUserByPhone(phone: string): Promise<User> {
-    const findUser: User = await UserEntity.findOne({ where: { phone } });
+    const findUser = await UserEntity.findOne({ where: { phone } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
     
     return findUser;
@@ -36,11 +36,11 @@ export class UserService extends Repository<UserEntity> {
 
   public async createUser(userData: User): Promise<User> {
 
-    const findUser: User = await UserEntity.findOne({ where: { email: userData.email } });
+    const findUser = await UserEntity.findOne({ where: { email: userData.email } });
 
     if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
 
-    const findPhone: User = await UserEntity.findOne({ where: { phone: userData.phone } });
+    const findPhone = await UserEntity.findOne({ where: { phone: userData.phone } });
 
     if (findPhone) throw new HttpException(409, `This phone ${userData.phone} already exists`);
 
@@ -51,18 +51,21 @@ export class UserService extends Repository<UserEntity> {
   }
 
   public async updateUser(userId: number, userData: User): Promise<User> {
-    const findUser: User = await UserEntity.findOne({ where: { id: userId } });
+    const findUser = await UserEntity.findOne({ where: { id: userId } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
     const hashedPassword = await hash(userData.password, 10);
     await UserEntity.update(userId, { ...userData, password: hashedPassword });
 
-    const updateUser: User = await UserEntity.findOne({ where: { id: userId } });
+    const updateUser = await UserEntity.findOne({ where: { id: userId } });
+
+    if (!updateUser) throw new HttpException(409, "User doesn't exist");
+
     return updateUser;
   }
 
   public async deleteUser(userId: number): Promise<User> {
-    const findUser: User = await UserEntity.findOne({ where: { id: userId } });
+    const findUser = await UserEntity.findOne({ where: { id: userId } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
     await UserEntity.delete({ id: userId });

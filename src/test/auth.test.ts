@@ -13,11 +13,11 @@ const userData = {
   password: "password123"
 };
 
-let userId = 0;
+let userId : any = 0
 
-let userToken = ""
+// let userToken = ""
 
-let verifactionToken = ""
+let verifactionToken : any = ""
 
 describe('Testing Auth', () => {
 
@@ -33,8 +33,8 @@ describe('Testing Auth', () => {
   describe('[POST] /signup/email', () => {
     it('email signup should be disabled', async () => {
       try{
-      const response = await axios.post(`${apiUrl}/auth/signup/email`, userData);
-      }catch(error){
+      await axios.post(`${apiUrl}/auth/signup/email`, userData);
+      }catch(error : any){
       expect(error.response.status).toEqual(403);
       }
     });
@@ -65,10 +65,8 @@ describe('Testing Auth', () => {
   describe('[POST] /signup/email', () => {
     it('duplicate email should give error', async () => {
       try{
-      const response = await axios.post(`${apiUrl}/auth/signup/email`, userData);
-
-      console.log(response);
-      }catch(error){
+      await axios.post(`${apiUrl}/auth/signup/email`, userData);
+      }catch(error : any){
       expect(error.response.status).toEqual(409);
       }
 
@@ -95,8 +93,8 @@ describe('Testing Auth', () => {
   describe('[POST] /login/email', () => {
     it('email login should be disabled', async () => {
       try{
-      const response = await axios.post(`${apiUrl}/auth/login/email`, userData);
-      }catch(error){
+      await axios.post(`${apiUrl}/auth/login/email`, userData);
+      }catch(error : any){
       expect(error.response.status).toEqual(403);
       }
     });
@@ -132,8 +130,8 @@ describe('Testing Auth', () => {
   describe('[POST] /login/email', () => {
     it('email login should be disabled', async () => {
       try{
-      const response = await axios.post(`${apiUrl}/auth/login/email`, userData);
-      }catch(error){
+      await axios.post(`${apiUrl}/auth/login/email`, userData);
+      }catch(error : any){
       expect(error.response.status).toEqual(403);
       }
     });
@@ -161,8 +159,8 @@ describe('Testing Auth', () => {
   describe('[POST] /signup/phone', () => {
     it('phone signup should be disabled', async () => {
       try{
-      const response = await axios.post(`${apiUrl}/auth/signup/phone`, userData);
-      }catch(error){
+      await axios.post(`${apiUrl}/auth/signup/phone`, userData);
+      }catch(error : any){
       expect(error.response.status).toEqual(403);
       }
     });
@@ -192,8 +190,8 @@ describe('Testing Auth', () => {
   describe('[POST] /signup/phone', () => {
     it('response should give error for user exist', async () => {
       try{
-      const response = await axios.post(`${apiUrl}/auth/signup/phone`, userData);
-      }catch(error){
+      await axios.post(`${apiUrl}/auth/signup/phone`, userData);
+      }catch(error : any){
       expect(error.response.status).toEqual(409);
       }
     });
@@ -219,8 +217,8 @@ describe('Testing Auth', () => {
   describe('[POST] /login/phone', () => {
     it('phone login should be disabled', async () => {
       try{
-      const response = await axios.post(`${apiUrl}/auth/login/phone`, userData);
-      }catch(error){
+      await axios.post(`${apiUrl}/auth/login/phone`, userData);
+      }catch(error : any){
       expect(error.response.status).toEqual(403);
       }
     });
@@ -260,8 +258,8 @@ describe('Testing Auth', () => {
   describe('[POST] /login/phone', () => {
     it('phone login should be disabled', async () => {
       try{
-      const response = await axios.post(`${apiUrl}/auth/login/phone`, userData);
-      }catch(error){
+      await axios.post(`${apiUrl}/auth/login/phone`, userData);
+      }catch(error : any){
       expect(error.response.status).toEqual(403);
       }
     });

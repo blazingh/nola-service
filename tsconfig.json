@@ -1,25 +1,15 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "target": "es2017",
-    "lib": ["es2017", "esnext.asynciterable"],
-    "typeRoots": ["node_modules/@types"],
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "module": "commonjs",
-    "pretty": true,
-    "sourceMap": true,
-    "declaration": true,
-    "outDir": "dist",
-    "allowJs": true,
-    "noEmit": false,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "importHelpers": true,
-    "baseUrl": "src",
+    "target": "es6",                   // ECMAScript target version for the compiled JavaScript
+    "module": "commonjs",              // Module system for the compiled JavaScript
+    "outDir": "./dist",                // Output directory for compiled JavaScript files
+    "rootDir": "./src",                // Root directory for TypeScript source files
+    "strict": true,                    // Enable all strict type-checking options
+    "esModuleInterop": true,           // Enables compatibility with commonJS modules and ES modules
+    "forceConsistentCasingInFileNames": true, // Ensures consistent casing in file names (important for case-sensitive file systems)
+    "declaration": true,               // Generates corresponding '.d.ts' declaration files for TypeScript
+    "baseUrl": "./src",                // Base directory to resolve non-relative module names
     "paths": {
       "@/*": ["*"],
       "@config": ["config"],

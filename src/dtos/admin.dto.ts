@@ -1,27 +1,27 @@
 import { IsString, IsNotEmpty, MinLength, MaxLength, validate } from 'class-validator';
 
 export class AdminCreateUserDto {
-    public email: string;
+    public email!: string;
   
     @IsString()
-    @IsNotEmpty()
-    @MinLength(9)
-    @MaxLength(32)
-    public password: string;
+  @IsNotEmpty()
+  @MinLength(9)
+  @MaxLength(32)
+  public password!: string;
   
-    public phone: string;
+    public phone!: string;
 
-    public role: string;
+    public role!: string;
 
-    public adminVerified: boolean;
+    public adminVerified!: boolean;
 
-    public emailVerified: boolean;
+    public emailVerified!: boolean;
 
-    public phoneVerified: boolean;
+    public phoneVerified!: boolean;
 
-    public active : boolean;
+    public active!: boolean;
 
-    public twoFactorEnabled: boolean;
+    public twoFactorEnabled!: boolean;
   
     validate() {
       if (!this.email && !this.phone) throw new Error('Please provide email or phone');
@@ -43,5 +43,5 @@ export class AdminCreateUserDto {
 
   export class AdminUpdateSettingDto {
     @IsNotEmpty()
-    public value: string;
+    public value!: string;
   }

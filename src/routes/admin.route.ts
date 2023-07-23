@@ -28,9 +28,9 @@ export class AdminRoute implements Routes {
     this.router.delete(`${this.path}/user/:id`, AdminMiddleware, this.adminControler.deleteUser);
 
     // get all settings
-    this.router.get(`${this.path}/setting`, AdminMiddleware, this.adminControler.getSettings);
+    this.router.get(`${this.path}/setting`, AdminMiddleware, this.adminControler.findAllSettings);
     // get setting by name
-    this.router.get(`${this.path}/setting/:name`, AdminMiddleware, this.adminControler.getSettingByName);
+    this.router.get(`${this.path}/setting/:name`, AdminMiddleware, this.adminControler.findSettingByName);
     // update setting
     this.router.put(`${this.path}/setting/:name`, AdminMiddleware, ValidationMiddleware(AdminUpdateSettingDto), this.adminControler.updateSetting);
 

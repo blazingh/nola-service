@@ -3,17 +3,17 @@ import { IsString, IsNotEmpty, MinLength, MaxLength,  IsEmail } from 'class-vali
 export class CreateUserDto {
   @IsEmail()
   @IsNotEmpty()
-  public email: string;
+  public email!: string;
 
   @IsString()
   @IsNotEmpty()
   @MinLength(9)
   @MaxLength(32)
-  public password: string;
+  public password!: string;
 
   @IsString()
   @IsNotEmpty()
-  public phone: string;
+  public phone!: string;
 }
 
 export class NewPasswordDto {
@@ -21,11 +21,11 @@ export class NewPasswordDto {
   @IsNotEmpty()
   @MinLength(9)
   @MaxLength(32)
-  public password: string;
+  public password!: string;
 
   @IsString()
   @IsNotEmpty()
-  public token: string;
+  public token!: string;
 }
 
 export class UpdateUserDto {
@@ -33,5 +33,5 @@ export class UpdateUserDto {
   @IsNotEmpty()
   @MinLength(9)
   @MaxLength(32)
-  public password: string;
+  public password!: string;
 }

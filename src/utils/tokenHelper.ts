@@ -9,11 +9,11 @@ export const createUserToken = (user: User): TokenData => {
       id: user.id,
       sub: user.id.toString(),
       role: user.role,
-      emailVerified: user.emailVerified,
-      phoneVerified: user.phoneVerified,
-      adminVerified: user.adminVerified,
+      emailVerified: user.emailVerified || false,
+      phoneVerified: user.phoneVerified || false,
+      adminVerified: user.adminVerified || false,
     };
-    const secretKey: string = SECRET_KEY;
+    const secretKey: string = SECRET_KEY || '';
     const expiresIn = EXPIRES_IN;
   
     return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
@@ -24,14 +24,14 @@ export  const createGroupUserToken = (user: User, groupUser: GroupUser): TokenDa
       id: user.id,
       sub: user.id.toString(),
       role: user.role,
-      emailVerified: user.emailVerified,
-      phoneVerified: user.phoneVerified,
-      adminVerified: user.adminVerified,
-      groupID: groupUser.groupID,
-      groupSub: groupUser.groupID.toString(),
-      groupRole: groupUser.userRole,
+      emailVerified: user.emailVerified || false,
+      phoneVerified: user.phoneVerified || false,
+      adminVerified: user.adminVerified || false,
+      groupID: groupUser.groupID || "0",
+      groupSub: groupUser.groupID?.toString() || '0',
+      groupRole: groupUser.userRole || '',
     };
-    const secretKey: string = SECRET_KEY;
+    const secretKey: string = SECRET_KEY || '';
     const expiresIn = EXPIRES_IN;
   
     return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
@@ -45,7 +45,7 @@ export  const createVerifactionToken = (user: User): string => {
       method: user.email ? 'email' : 'phone',
     };
   
-    const secretKey: string = SECRET_KEY;
+    const secretKey: string = SECRET_KEY || '';
     const expiresIn = 15 * 60;
   
     const token = sign(dataStoredInToken, secretKey, { expiresIn });
@@ -57,12 +57,12 @@ export const createAdminToken = (): TokenData => {
     const dataStoredInToken: DataStoredInUserToken = {
       id: 1,
       sub: '1',
-      role: ADMIN_ROLE,
+      role: ADMIN_ROLE || "",
       emailVerified: true,
       phoneVerified: true,
       adminVerified: true,
     };
-    const secretKey: string = SECRET_KEY;
+    const secretKey: string = SECRET_KEY || '';
     const expiresIn = 10 * 60;
   
     return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };

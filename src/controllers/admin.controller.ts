@@ -77,10 +77,10 @@ export class AdminController {
     }
   }
 
-    public getSettingByName = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    public findSettingByName = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const name = req.params.name;
-        const settingsData = await this.settings.getSettingByName(name);
+        const settingsData = await this.settings.findSettingByName(name);
         
         res.status(200).json({ data: settingsData, message: 'found settings' });
     } catch (error) {
@@ -88,9 +88,9 @@ export class AdminController {
     }
     }
 
-  public getSettings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public findAllSettings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const settingsData = await this.settings.getSettings();
+      const settingsData = await this.settings.findAllSettings();
 
       res.status(200).json({ data: settingsData, message: 'found settings' });
     } catch (error) {
@@ -101,7 +101,7 @@ export class AdminController {
 
     public getGroupUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const groupUsersData = await this.groupUser.getGroupUsers();
+        const groupUsersData = await this.groupUser.findAllGroupUsers();
         
         res.status(200).json({ data: groupUsersData, message: 'found group users' });
     } catch (error) {
@@ -112,7 +112,7 @@ export class AdminController {
     public getGroupUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const groupUserId = Number(req.params.id);
-        const groupUserData = await this.groupUser.getGroupUserById(groupUserId);
+        const groupUserData = await this.groupUser.findGroupUserById(groupUserId);
         
         res.status(200).json({ data: groupUserData, message: 'found group user' });
     } catch (error) {
@@ -156,8 +156,8 @@ export class AdminController {
 
     public getGroupUserPair = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const groupUserId = Number(req.params.id);
-        const groupUserData = await this.groupUser.getGroupUserPair(groupUserId);
+        const { userId, groupId } = req.body;
+        const groupUserData = await this.groupUser.findGroupUserPair(userId, groupId);
         
         res.status(200).json({ data: groupUserData, message: 'found group user pair' });
     } catch (error) {
