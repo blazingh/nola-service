@@ -1,63 +1,15 @@
 import { compare, hash } from 'bcrypt';
-import { sign, verify } from 'jsonwebtoken';
+import { verify } from 'jsonwebtoken';
 import { Service } from 'typedi';
 import { EntityRepository, Repository } from 'typeorm';
-import { APP_URL, EXPIRES_IN, SECRET_KEY } from '@config';
+import { APP_URL, SECRET_KEY } from '@config';
 import { UserEntity } from '@entities/users.entity';
 import { HttpException } from '@/exceptions/httpException';
-import { DataStoredInGroupUserToken, DataStoredInToken, TokenData, verifactionToken } from '@interfaces/auth.interface';
+import {  TokenData, verifactionToken } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
 import { GroupUserEntity } from '@/entities/groupUser.entity';
 import { GroupUser } from '@/interfaces/groupUser.interface';
-
-const createToken = (user: User): TokenData => {
-  const dataStoredInToken: DataStoredInToken = {
-    id: user.id,
-    sub: user.id.toString(),
-    role: user.role,
-    emailVerified: user.emailVerified,
-    phoneVerified: user.phoneVerified,
-    adminVerified: user.adminVerified,
-  };
-  const secretKey: string = SECRET_KEY;
-  const expiresIn: number = Number(EXPIRES_IN);
-
-  return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
-};
-
-const createGroupUserToken = (user: User, groupUser: GroupUser): TokenData => {
-  const dataStoredInToken: DataStoredInGroupUserToken = {
-    id: user.id,
-    sub: user.id.toString(),
-    role: user.role,
-    emailVerified: user.emailVerified,
-    phoneVerified: user.phoneVerified,
-    adminVerified: user.adminVerified,
-    groupID: groupUser.groupID,
-    groupSub: groupUser.groupID.toString(),
-    groupRole: groupUser.userRole,
-  };
-  const secretKey: string = SECRET_KEY;
-  const expiresIn: number = Number(EXPIRES_IN);
-
-  return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
-};
-
-
-const createVerifactionToken = (user: User): string => {
-  const dataStoredInToken: verifactionToken = {
-    type: 'verification',
-    sub: user.id.toString(),
-    method: user.email ? 'email' : 'phone',
-  };
-
-  const secretKey: string = SECRET_KEY;
-  const expiresIn: number = 15 * 60;
-
-  const token = sign(dataStoredInToken, secretKey, { expiresIn });
-
-  return token;
-};
+import { createGroupUserToken, createUserToken, createVerifactionToken } from '@/utils/tokenHelper';
 
 const createCookie = (tokenData: TokenData): string => {
   return `Authorization=${tokenData.token}; HttpOnly; Max-Age=${tokenData.expiresIn};`;
@@ -107,7 +59,7 @@ export class AuthService extends Repository<UserEntity> {
 
     if (!isPasswordMatching) throw new HttpException(409, 'Password not matching');
 
-    const tokenData = createToken(findUser);
+    const tokenData = createUserToken(findUser);
 
     const cookie = createCookie(tokenData);
 
