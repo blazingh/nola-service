@@ -21,7 +21,7 @@ export class AuthController {
       if (method === 'email') {
         const EmailSignup = await SettingEntity.findOne({ where: { name: settingsOptions.DISABLE_EMAIL_SIGNUP } });
 
-        if (EmailSignup?.value === 'true') throw new Error('Email signup is disabled');
+        if (EmailSignup?.value) throw new Error('Email signup is disabled');
 
         const signUpUserData: User = await this.auth.signupWithEmail(userData);
 
@@ -36,6 +36,7 @@ export class AuthController {
         });
 
         res.status(201).json({ data: signUpUserData, message: mail.response, token: verifactionToken });
+        return;
       }
       if (method === 'phone') {
         const PhoneSignup = await SettingEntity.findOne({ where: { name: settingsOptions.DISABLE_PHONE_SIGNUP } });
@@ -49,6 +50,7 @@ export class AuthController {
         const verifactionLink = `${APP_URL}/${verifactionToken}`;
 
         res.status(201).json({ data: signUpUserData, message: verifactionLink, token: verifactionToken });
+      return;
       }
 
       throw new Error('Invalid signup method');

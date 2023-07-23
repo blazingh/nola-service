@@ -9,7 +9,9 @@ export class SettingEntity extends BaseEntity implements Setting {
   @Column()
   name: string;
 
-  @Column()
+  @Column({
+  nullable: true,
+  })
   value: string;
 
   @Column()

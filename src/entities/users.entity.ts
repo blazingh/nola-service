@@ -23,23 +23,33 @@ export class UserEntity extends BaseEntity implements User {
   @IsNotEmpty()
   password: string;
 
-  @Column()
+  @Column({
+  default: 'user',
+})
   @IsNotEmpty()
   role: string;
 
-  @Column()
+  @Column({
+  default: true,
+  })
   @IsNotEmpty()
   active: boolean;
 
-  @Column()
+  @Column({
+  default: false,
+  })
   @IsNotEmpty()
   emailVerified: boolean;
 
-  @Column()
+  @Column({
+  default: false,
+  })
   @IsNotEmpty()
   phoneVerified: boolean;
 
-  @Column()
+  @Column({
+  default: false,
+  })
   @IsNotEmpty()
   adminVerified: boolean;
 
@@ -81,7 +91,8 @@ export class UserEntity extends BaseEntity implements User {
   twoFactorCodeExpire: Date;
 
   @Column({
-    nullable: true,
+    default: false,
   })
+  @IsNotEmpty()
   twoFactorEnabled: boolean;
 }
